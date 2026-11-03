@@ -16,7 +16,7 @@ export default {
       try { body = await request.json(); } catch { return json({ error: "Send valid JSON." }, 400); }
       const message = typeof body.message === "string" ? body.message.trim() : "";
       if (!message || message.length > 4000) return json({ error: "Message must be between 1 and 4000 characters." }, 400);
-      if (!env.AI) return json({ error: "AI is not connected yet. Configure a Cloudflare Workers AI binding named AI." }, 503);
+      if (!env.AI) return json({ error: "AI is not connected yet. Enable a Cloudflare Workers AI binding named AI." }, 503);
       try {
         const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
           messages: [
@@ -25,10 +25,11 @@ export default {
           ]
         });
         return json({ reply: result.response || "I couldn't generate a response. Please try again." });
-      } catch (error) {
-        return json({ error: "The AI service could not complete this request. Check the Workers AI binding and account access." }, 502);
+      } catch {
+        return json({ error: "The AI service could not complete this request. Check Workers AI availability and account access." }, 502);
       }
     }
+    if (env.ASSETS) return env.ASSETS.fetch(request);
     return json({ error: "Not found." }, 404);
   }
 };
