@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d1d"><meta name="description" content="NEXORA — a helpful public AI assistant.">
+<title>NEXORA — AI Assistant</title>
+<style>
+:root{color-scheme:dark;--bg:#080d1d;--panel:#111a30;--line:#263653;--text:#eef4ff;--muted:#9aabc7;--accent:#65d6ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#17345a 0,transparent 55%),var(--bg);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+header{display:flex;align-items:center;justify-content:space-between;padding:18px max(5vw,18px);border-bottom:1px solid #ffffff16;position:sticky;top:0;background:#080d1ddd;backdrop-filter:blur(14px)}
+.brand{font-weight:850;letter-spacing:.16em;font-size:1.2rem}.brand span{color:var(--accent)}.tag{color:var(--muted);font-size:.82rem}
+main{width:min(900px,92vw);margin:42px auto 30px}.hero{text-align:center;margin-bottom:28px}.hero h1{font-size:clamp(2rem,6vw,3.6rem);margin:8px 0}.hero p{color:var(--muted);margin:0}
+.card{background:#111a30eF;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 24px 80px #0005}
+.toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);color:var(--muted);font-size:.85rem}
+#messages{height:min(54vh,520px);min-height:300px;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:14px}
+.msg{max-width:85%;padding:13px 16px;border-radius:17px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}.bot{align-self:flex-start;background:#1a2944;border:1px solid #2a4265}.user{align-self:flex-end;background:#174b69;border:1px solid #287ba0}
+.composer{padding:16px;border-top:1px solid var(--line)}form{display:flex;gap:10px}textarea{flex:1;resize:vertical;min-height:52px;max-height:150px;background:#091225;border:1px solid var(--line);border-radius:14px;padding:14px;color:var(--text);font:inherit;outline:none}textarea:focus{border-color:var(--accent)}button{border:0;border-radius:14px;background:var(--accent);color:#06111e;font-weight:750;padding:0 22px;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.hint{text-align:center;color:var(--muted);font-size:.78rem;margin:12px 0 0}.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:18px 0}.chip{background:#101b30;color:#c9dcf7;border:1px solid var(--line);padding:9px 13px;border-radius:999px;font-size:.84rem;cursor:pointer}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px}
+@media(max-width:560px){main{margin-top:28px}.msg{max-width:94%}form{flex-direction:column}button{min-height:48px}}
+</style>
+</head>
+<body>
+<header><div class="brand">NEXORA<span>✦</span></div><div class="tag">Public AI assistant</div></header>
+<main><section class="hero"><div class="tag">ONE ASSISTANT · MANY POSSIBILITIES</div><h1>Meet NEXORA</h1><p>Ask questions, explore ideas, learn and create.</p></section>
+<div class="chips" aria-label="Suggested prompts"><button class="chip" type="button">Explain a difficult topic</button><button class="chip" type="button">Give me creative ideas</button><button class="chip" type="button">Tell me a joke</button></div>
+<section class="card"><div class="toolbar"><span>Conversation</span><span id="status">Knowledge mode</span></div><div id="messages" aria-live="polite"><div class="msg bot">Hello! I'm NEXORA. I can answer basic questions from my starter knowledge library. A live AI model and Google integrations will be connected in a later setup step.</div></div><div class="composer"><form id="form"><textarea id="prompt" maxlength="4000" placeholder="Message NEXORA…" aria-label="Your message"></textarea><button id="send" type="submit">Send</button></form><p class="hint">Please don't share passwords, private keys or sensitive personal information.</p></div></section></main>
+<footer>Created by Oduyebo Abiola · NEXORA</footer>
+<script>
+const messages=document.querySelector('#messages'),form=document.querySelector('#form'),input=document.querySelector('#prompt'),send=document.querySelector('#send'),status=document.querySelector('#status');
+function add(text,who){const el=document.createElement('div');el.className='msg '+who;el.textContent=text;messages.append(el);messages.scrollTop=messages.scrollHeight}
+async function ask(question){add(question,'user');send.disabled=true;status.textContent='Thinking…';try{const res=await fetch('/api/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:question})});const data=await res.json();if(!res.ok)throw new Error(data.error||'The assistant is not configured yet.');add(data.reply||'I could not create a response.','bot')}catch(e){add('NEXORA is currently running in starter mode. '+e.message+' You can still explore the website; the live AI connection will be enabled after deployment configuration.','bot')}finally{send.disabled=false;status.textContent='Knowledge mode';input.focus()}}
+form.addEventListener('submit',e=>{e.preventDefault();const q=input.value.trim();if(!q)return;input.value='';ask(q)});
+document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{input.value=b.textContent;input.focus()}));
+</script>
+</body></html>
